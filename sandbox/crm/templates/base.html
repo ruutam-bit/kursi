@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="lv">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %} · Sadarbības CRM</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <a class="skip" href="#saturs">Pāriet uz saturu</a>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="{{ url_for('dashboard') }}">Sadarbības CRM</a>
+      {% if g.user %}
+      <nav aria-label="Galvenā navigācija">
+        <ul class="nav">
+          {% if g.user.role == 'administrators' %}
+            {% set links = [('admin', 'Administrēšana')] %}
+          {% else %}
+            {% set links = [('dashboard', 'Sākums'), ('orgs', 'Organizācijas'), ('requests_list', 'Pieprasījumi'), ('tasks', 'Mani uzdevumi')] %}
+            {% if g.user.role == 'vaditajs' %}{% set links = links + [('overview', 'Pārskats')] %}{% endif %}
+          {% endif %}
+          {% for endpoint, label in links %}
+          <li><a href="{{ url_for(endpoint) }}"{% if request.endpoint == endpoint %} aria-current="page"{% endif %}>{{ label }}</a></li>
+          {% endfor %}
+        </ul>
+      </nav>
+      <form method="post" action="{{ url_for('logout') }}" class="whoami">
+        <input type="hidden" name="csrf" value="{{ csrf }}">
+        <span>{{ g.user.name }} <span class="muted">({{ ROLES[g.user.role]|lower }})</span></span>
+        <button type="submit" class="btn-link">Mainīt lomu</button>
+      </form>
+      {% endif %}
+    </div>
+  </header>
+  <main id="saturs" class="wrap" tabindex="-1">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div role="status" class="flashes">
+        {% for category, message in messages %}<p class="flash {{ category }}">{{ message }}</p>{% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="wrap footer">
+    <p>Mācību vide · visi dati ir sintētiski · <a href="{{ url_for('accessibility') }}">Piekļūstamības paziņojums</a></p>
+  </footer>
+</body>
+</html>

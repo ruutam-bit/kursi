@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import field, select, error_summary, csrf_field with context %}
+{% block title %}{{ 'Labot organizāciju' if org else 'Jauna organizācija' }}{% endblock %}
+{% block content %}
+<h1>{{ 'Labot: ' ~ org.name if org else 'Jauna organizācija' }}</h1>
+{{ error_summary(errors) }}
+<form method="post" class="card narrow" novalidate>
+  {{ csrf_field() }}
+  {{ field('name', 'Nosaukums', data, errors, required=true) }}
+  {{ field('reg_nr', 'Reģistrācijas numurs', data, errors, required=true, hint='11 cipari, piemēram, 40003000001', attrs='inputmode="numeric" autocomplete="off"') }}
+  {{ select('type', 'Veids', ORG_TYPES.items(), data, errors, required=true, placeholder='— izvēlies —') }}
+  {% if g.user.role == 'vaditajs' %}
+    {% set opts = [] %}{% for u in users %}{% set _ = opts.append((u.id, u.name)) %}{% endfor %}
+    {{ select('owner_id', 'Atbildīgais darbinieks', opts, data, errors, required=true) }}
+  {% else %}
+    <p class="hint">Atbildīgais darbinieks: <strong>{{ org.owner_name if org else g.user.name }}</strong> (mainīt var vadītājs).</p>
+  {% endif %}
+  <div class="actions">
+    <button type="submit" class="btn">Saglabāt</button>
+    <a href="{{ url_for('org_detail', org_id=org.id) if org else url_for('orgs') }}">Atcelt</a>
+  </div>
+</form>
+{% endblock %}

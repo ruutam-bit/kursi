@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import csrf_field with context %}
+{% block title %}Lomas izvēle{% endblock %}
+{% block content %}
+<h1>Sadarbības CRM</h1>
+<p class="notice"><strong>Mācību režīms:</strong> paroļu nav. Izvēlies lietotāju — loma nosaka, ko redzi. <strong>Darbinieks</strong> — savas organizācijas, kontakti, žurnāls, uzdevumi. <strong>Vadītājs</strong> — visas organizācijas un pārskats. <strong>Administrators</strong> — lomas, personas datu dzēšana, piekļuves žurnāls.</p>
+<form method="post" action="{{ url_for('choose_user') }}" class="card narrow">
+  {{ csrf_field() }}
+  <fieldset>
+    <legend>Pieslēgties kā</legend>
+    {% if error %}<p class="error" id="user-err"><span aria-hidden="true">⚠ </span>{{ error }}</p>{% endif %}
+    {% for u in users %}
+    <div class="radio">
+      <input type="radio" id="u{{ u.id }}" name="user_id" value="{{ u.id }}" required{% if loop.first %} checked{% endif %}>
+      <label for="u{{ u.id }}">{{ u.name }} — {{ ROLES[u.role]|lower }}</label>
+    </div>
+    {% endfor %}
+  </fieldset>
+  <button type="submit" class="btn">Turpināt</button>
+</form>
+{% endblock %}

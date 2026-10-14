@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import csrf_field with context %}
+{% block title %}Vadības panelis{% endblock %}
+{% block content %}
+<h1>Labdien, {{ g.user.name.split()[0] }}!</h1>
+<p class="muted">{{ 'Visas iestādes kopsavilkums' if g.user.role == 'vaditajs' else 'Tavu organizāciju kopsavilkums' }} · {{ g.today }}</p>
+<ul class="stats" aria-label="Kopsavilkums">
+  <li class="stat"><a href="{{ url_for('orgs') }}"><span class="num">{{ stats.orgs }}</span> organizācijas</a></li>
+  <li class="stat"><a href="{{ url_for('requests_list') }}"><span class="num">{{ stats.open }}</span> atvērti pieprasījumi</a></li>
+  <li class="stat{% if stats.overdue %} warn{% endif %}"><a href="{{ url_for('requests_list') }}"><span class="num">{{ stats.overdue }}</span> kavēti pieprasījumi</a></li>
+  <li class="stat"><a href="{{ url_for('tasks') }}"><span class="num">{{ stats.tasks }}</span> uzdevumi šodien</a></li>
+</ul>
+
+<div class="grid2">
+<section aria-labelledby="h-tasks" class="card">
+  <h2 id="h-tasks">Mani uzdevumi šodien</h2>
+  {% include '_task_list.html' %}
+</section>
+<section aria-labelledby="h-recent" class="card">
+  <h2 id="h-recent">Pēdējās mijiedarbības</h2>
+  {% if recent %}
+  <ul class="timeline">
+    {% for i in recent %}
+    <li><span class="muted">{{ i.date }} · {{ INTERACTION_TYPES[i.type] }}</span><br>
+      <a href="{{ url_for('org_detail', org_id=i.org_id) }}">{{ i.org_name }}</a>: {{ i.summary }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}<p>Vēl nav mijiedarbību.</p>{% endif %}
+</section>
+</div>
+{% endblock %}

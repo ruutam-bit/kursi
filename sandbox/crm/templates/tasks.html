@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import field, error_summary, csrf_field with context %}
+{% block title %}Uzdevumi{% endblock %}
+{% block content %}
+<h1>Uzdevumi</h1>
+<div class="grid2">
+<section aria-labelledby="h-today" class="card">
+  <h2 id="h-today">Mani uzdevumi šodien</h2>
+  {% include '_task_list.html' %}
+  <h2>Vēlāk</h2>
+  {% if upcoming %}
+  <ul class="plain">{% for t in upcoming %}<li>{{ t.due_date }} — {{ t.title }} <span class="muted">({{ t.org_name or t.request_title }})</span></li>{% endfor %}</ul>
+  {% else %}<p>Nav.</p>{% endif %}
+</section>
+<section aria-labelledby="h-new" class="card">
+  <h2 id="h-new">Jauns uzdevums</h2>
+  {{ error_summary(errors) }}
+  <form method="post" novalidate>
+    {{ csrf_field() }}
+    {{ field('title', 'Uzdevums', data, errors, required=true) }}
+    {{ field('due_date', 'Termiņš', data, errors, type='date', required=true) }}
+    <div class="field{% if errors.link %} has-error{% endif %}">
+      <label for="f-link">Saistīts ar <span class="req">(obligāts)</span></label>
+      {% if errors.link %}<p class="error" id="f-link-err"><span aria-hidden="true">⚠ </span>{{ errors.link }}</p>{% endif %}
+      <select id="f-link" name="link" required{% if errors.link %} aria-invalid="true" aria-describedby="f-link-err"{% endif %}>
+        <option value="">— izvēlies —</option>
+        <optgroup label="Organizācijas">{% for o in orgs %}<option value="org:{{ o.id }}"{% if data.link == 'org:' ~ o.id %} selected{% endif %}>{{ o.name }}</option>{% endfor %}</optgroup>
+        <optgroup label="Pieprasījumi">{% for r in reqs %}<option value="req:{{ r.id }}"{% if data.link == 'req:' ~ r.id %} selected{% endif %}>{{ r.title }} ({{ r.org_name }})</option>{% endfor %}</optgroup>
+      </select>
+    </div>
+    <button type="submit" class="btn">Pievienot</button>
+  </form>
+</section>
+</div>
+{% endblock %}

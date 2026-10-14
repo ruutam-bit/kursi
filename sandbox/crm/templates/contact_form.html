@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import field, select, error_summary, csrf_field with context %}
+{% block title %}{{ 'Labot kontaktpersonu' if contact else 'Jauna kontaktpersona' }}{% endblock %}
+{% block content %}
+<h1>{{ ('Labot: ' ~ contact.name) if contact else 'Jauna kontaktpersona' }} · {{ org.name }}</h1>
+<p class="notice">Ievadi tikai saziņai vajadzīgos darba kontaktdatus (VDAR datu minimizācija). Neievadi personas kodu, adresi vai privātas piezīmes. Dati tiek glabāti 3 gadus no pamata datuma. Izmaiņas tiek reģistrētas piekļuves žurnālā.</p>
+{{ error_summary(errors) }}
+<form method="post" class="card narrow" novalidate>
+  {{ csrf_field() }}
+  {{ field('name', 'Vārds, uzvārds', data, errors, required=true, attrs='autocomplete="off"') }}
+  {{ field('position', 'Amats', data, errors) }}
+  {{ field('email', 'Darba e-pasts', data, errors, type='email', hint='Vismaz e-pasts vai tālrunis ir obligāts.', attrs='autocomplete="off"') }}
+  {{ field('phone', 'Darba tālrunis', data, errors, type='tel', attrs='autocomplete="off"') }}
+  {{ select('basis', 'Saziņas tiesiskais pamats', CONTACT_BASES.items(), data, errors, required=true, placeholder='— izvēlies —') }}
+  {{ field('basis_date', 'Pamata datums', data, errors, type='date', required=true, hint='Datums, kad radās pamats (līgums, piekrišana u. c.). No tā rēķina glabāšanas termiņu.') }}
+  <div class="actions">
+    <button type="submit" class="btn">Saglabāt</button>
+    <a href="{{ url_for('org_detail', org_id=org.id) }}#kontakti">Atcelt</a>
+  </div>
+</form>
+{% endblock %}

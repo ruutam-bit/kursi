@@ -1,0 +1,42 @@
+{% macro field(name, label, data, errors, type='text', required=false, hint=none, attrs='') -%}
+<div class="field{% if errors.get(name) %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span class="req">(obligāts)</span>{% endif %}</label>
+  {% if hint %}<p class="hint" id="f-{{ name }}-hint">{{ hint }}</p>{% endif %}
+  {% if errors.get(name) %}<p class="error" id="f-{{ name }}-err"><span aria-hidden="true">⚠ </span>{{ errors[name] }}</p>{% endif %}
+  {% set described = ([('f-' ~ name ~ '-hint') if hint else none, ('f-' ~ name ~ '-err') if errors.get(name) else none] | select | join(' ')) %}
+  {% if type == 'textarea' %}
+  <textarea id="f-{{ name }}" name="{{ name }}" rows="4"{% if required %} required{% endif %}{% if described %} aria-describedby="{{ described }}"{% endif %}{% if errors.get(name) %} aria-invalid="true"{% endif %} {{ attrs|safe }}>{{ data.get(name, '') or '' }}</textarea>
+  {% else %}
+  <input id="f-{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ data.get(name, '') or '' }}"{% if required %} required{% endif %}{% if described %} aria-describedby="{{ described }}"{% endif %}{% if errors.get(name) %} aria-invalid="true"{% endif %} {{ attrs|safe }}>
+  {% endif %}
+</div>
+{%- endmacro %}
+
+{% macro select(name, label, options, data, errors, required=false, placeholder=none) -%}
+<div class="field{% if errors.get(name) %} has-error{% endif %}">
+  <label for="f-{{ name }}">{{ label }}{% if required %} <span class="req">(obligāts)</span>{% endif %}</label>
+  {% if errors.get(name) %}<p class="error" id="f-{{ name }}-err"><span aria-hidden="true">⚠ </span>{{ errors[name] }}</p>{% endif %}
+  <select id="f-{{ name }}" name="{{ name }}"{% if required %} required{% endif %}{% if errors.get(name) %} aria-invalid="true" aria-describedby="f-{{ name }}-err"{% endif %}>
+    {% if placeholder %}<option value="">{{ placeholder }}</option>{% endif %}
+    {% for value, text in options %}
+    <option value="{{ value }}"{% if (data.get(name)|string) == (value|string) %} selected{% endif %}>{{ text }}</option>
+    {% endfor %}
+  </select>
+</div>
+{%- endmacro %}
+
+{% macro error_summary(errors) -%}
+{% if errors %}
+<div class="error-summary" role="alert" tabindex="-1" id="kludas">
+  <h2>Formā ir {{ errors|length }} {{ 'kļūda' if errors|length == 1 else 'kļūdas' }}</h2>
+  <ul>{% for name, msg in errors.items() %}<li><a href="#f-{{ name }}">{{ msg }}</a></li>{% endfor %}</ul>
+</div>
+{% endif %}
+{%- endmacro %}
+
+{% macro csrf_field() -%}<input type="hidden" name="csrf" value="{{ csrf }}">{%- endmacro %}
+
+{% macro status_badge(status, overdue=false) -%}
+<span class="badge status-{{ status }}">{{ REQUEST_STATUSES[status] }}</span>
+{%- if overdue %} <span class="badge overdue"><span aria-hidden="true">⏰ </span>Kavēts</span>{% endif %}
+{%- endmacro %}

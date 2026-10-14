@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import field, select, error_summary, csrf_field with context %}
+{% block title %}Jauna mijiedarbība{% endblock %}
+{% block content %}
+<h1>Jauna mijiedarbība: {{ org.name }}</h1>
+{{ error_summary(errors) }}
+<form method="post" class="card" novalidate>
+  {{ csrf_field() }}
+  <input type="hidden" name="ai_model" value="{{ data.ai_model or '' }}">
+  <input type="hidden" name="ai_summary" value="{{ data.ai_summary or '' }}">
+  <div class="grid2">
+    {{ select('type', 'Veids', INTERACTION_TYPES.items(), data, errors, required=true) }}
+    {{ field('date', 'Datums', data, errors, type='date', required=true) }}
+  </div>
+  <fieldset class="field{% if errors.contact_ids %} has-error{% endif %}">
+    <legend>Dalībnieki</legend>
+    {% if errors.contact_ids %}<p class="error"><span aria-hidden="true">⚠ </span>{{ errors.contact_ids }}</p>{% endif %}
+    {% for c in contacts %}
+    <div class="checkbox">
+      <input type="checkbox" id="c{{ c.id }}" name="contact_ids" value="{{ c.id }}"{% if c.id in data.contact_ids %} checked{% endif %}>
+      <label for="c{{ c.id }}">{{ c.name }}</label>
+    </div>
+    {% else %}<p class="hint">Organizācijai nav kontaktpersonu.</p>{% endfor %}
+  </fieldset>
+
+  <details class="ai-box"{% if draft or errors.notes or data.notes %} open{% endif %}>
+    <summary>Palīdzība ar MI: kopsavilkums no piezīmēm</summary>
+    <p class="hint" id="f-notes-hint">MI no piezīmēm sagatavos 3 teikumu kopsavilkumu un nākamā soļa ieteikumu. Tas ir tikai melnraksts — pārbaudi un labo to pirms saglabāšanas. E-pasta adreses un tālruņi pirms nosūtīšanas tiek aizstāti.</p>
+    {% if errors.notes %}<p class="error" id="f-notes-err"><span aria-hidden="true">⚠ </span>{{ errors.notes }}</p>{% endif %}
+    <label for="f-notes">Brīvas piezīmes</label>
+    <textarea id="f-notes" name="notes" rows="5" aria-describedby="f-notes-hint{% if errors.notes %} f-notes-err{% endif %}"{% if errors.notes %} aria-invalid="true"{% endif %}>{{ data.notes or '' }}</textarea>
+    <button type="submit" name="action" value="generate" class="btn secondary" formnovalidate>Ģenerēt ar MI</button>
+  </details>
+
+  {% if draft %}
+  <p class="badge ai" role="status">Ģenerēts ar MI ({{ 'bezsaistes demo režīms' if draft.model == 'bezsaistes-demo' else draft.model }}) — pārbaudi un labo pirms saglabāšanas</p>
+  {% endif %}
+  {{ field('summary', 'Kopsavilkums', data, errors, type='textarea', required=true) }}
+  {{ field('next_step', 'Nākamais solis', data, errors) }}
+  <div class="actions">
+    <button type="submit" name="action" value="save" class="btn">{{ 'Apstiprināt un saglabāt' if draft else 'Saglabāt' }}</button>
+    <a href="{{ url_for('org_detail', org_id=org.id) }}">Atcelt</a>
+  </div>
+</form>
+{% endblock %}
