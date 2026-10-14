@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Piekļūstamības paziņojums{% endblock %}
+{% block content %}
+<h1>Piekļūstamības paziņojums</h1>
+<p>Sadarbības CRM (mācību vide) cenšas atbilst standartam <strong>EN 301 549</strong> un <strong>WCAG 2.2 AA</strong> līmenim.
+Atbilstības statuss: <strong>daļēji atbilst</strong> — automatizētās pārbaudes ir izturētas, bet pārbaude ar ekrāna lasītāju (NVDA) vēl nav veikta.</p>
+<p>Novērtējums veikts 2026. gada 14. oktobrī, pašnovērtējums izstrādes laikā.</p>
+
+<section aria-labelledby="h-method" class="card">
+  <h2 id="h-method">Kā pārbaudīts</h2>
+  <ul>
+    <li><code>tests/a11y_check.py</code>: <strong>axe-core 4.10.3</strong> Chromium pārlūkā (Playwright), WCAG 2.0/2.1/2.2 A un AA noteikumi, gaišajā un tumšajā režīmā — 19 ekrāni visām trim lomām, ieskaitot formu kļūdu stāvokli un MI melnraksta stāvokli.</li>
+    <li>Tas pats skripts: <strong>pārplūde</strong> (WCAG 1.4.10, 1.4.4) pie 640 CSS px (≈ 200 % mērogs) un 320 CSS px (≈ 400 %) un <strong>tastatūras ceļš</strong> (WCAG 2.1.1, 2.4.1, 2.4.7) «Sākums → uzdevums izpildīts» tikai ar Tab un Enter.</li>
+    <li><code>tests/test_crm.py</code> katrā ekrānā: <code>lang="lv"</code>, viens <code>h1</code>, orientieri, izlaišanas saite, visiem laukiem <code>label</code>, nav dublētu <code>id</code>, tabulām <code>caption</code> un <code>th scope</code>.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="h-results" class="card">
+  <h2 id="h-results">Atradumi</h2>
+  <div class="table-wrap">
+  <table>
+    <caption>Pārbaužu rezultāti</caption>
+    <thead><tr><th scope="col">Pārbaude</th><th scope="col">Rezultāts</th><th scope="col">Rīcība</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">axe-core, mērķa izmērs (WCAG 2.5.8), «Pieprasījumi»</th><td><strong>Atrasta nopietna kļūda:</strong> saite «Atbildes projekts» bija pārāk tuvu statusa pogai tajā pašā šūnā.</td><td>Labots: darbības izkārtotas vertikāli ar atstarpi; atkārtotā pārbaudē 0 pārkāpumu</td></tr>
+      <tr><th scope="row">Pārplūde 320 px, «Pieprasījumi»</th><td><strong>Atrasta kļūda:</strong> lapa ritinājās horizontāli par 275 px — pogu ekrāna lasītāja teksts (absolūti pozicionēts) izkļuva ārpus tabulas ritināšanas apgabala.</td><td>Labots (tabulas konteinerim <code>position: relative</code>); atkārtotā pārbaudē 0 px visos ekrānos</td></tr>
+      <tr><th scope="row">axe-core, pārējie noteikumi</th><td>0 pārkāpumu visos 19 ekrānos abos krāsu režīmos</td><td>—</td></tr>
+      <tr><th scope="row">axe-core, «jāpārbauda manuāli»</th><td>Krāsu kontrasts SVG diagrammas tekstam («Pārskats») un teksta laukiem MI formās — axe nevar noteikt fonu</td><td>Pārbaudīts manuāli: izmantotas pamata teksta krāsas uz kartītes fona (virs 4,5:1 abos režīmos)</td></tr>
+      <tr><th scope="row">Pārplūde 640 px un 320 px</th><td>0 px horizontālas ritināšanas visos ekrānos</td><td>—</td></tr>
+      <tr><th scope="row">Tastatūra</th><td>Pirmais Tab — redzama saite «Pāriet uz saturu», Enter pārvieto fokusu uz saturu; poga «Izpildīts» sasniedzama ar 5 Tab; fokusa rāmis redzams (3 px)</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<section aria-labelledby="h-known" class="card">
+  <h2 id="h-known">Zināmie ierobežojumi</h2>
+  <ul>
+    <li>Nav veikta pārbaude ar ekrāna lasītāju (NVDA) — tā ir manuālo testu sarakstā un jāveic pirms ieviešanas.</li>
+    <li>Plašas tabulas (kontaktpersonas, kavētie pieprasījumi) šaurā ekrānā ritinās horizontāli tabulas iekšienē; lapa kopumā neritinās.</li>
+    <li>Datuma lauki izmanto pārlūka datuma izvēlni, kuras formāts atkarīgs no pārlūka valodas.</li>
+    <li>Diagramma ekrānā «Pārskats» ir dublēta tabulā; diagramma pati nav interaktīva ar tastatūru.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="h-feedback" class="card">
+  <h2 id="h-feedback">Atsauksmes</h2>
+  <p>Ja kāda sistēmas daļa nav pieejama, ziņo kursa pasniedzējam vai izveido pieteikumu uzskaites sistēmā ar atzīmi «piekļūstamība».</p>
+</section>
+{% endblock %}

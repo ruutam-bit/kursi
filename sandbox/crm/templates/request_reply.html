@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import error_summary, csrf_field, status_badge with context %}
+{% block title %}Atbildes projekts{% endblock %}
+{% block content %}
+<p><a href="{{ url_for('requests_list') }}">← Pieprasījumi</a></p>
+<h1>Atbildes projekts: {{ req.title }}</h1>
+<p>{{ org.name }} · termiņš {{ req.due_date }} · {{ status_badge(req.status) }}</p>
+<p class="notice">MI sagatavo e-pasta atbildes <strong>projektu</strong> no tavām iekšējām piezīmēm. Sistēma e-pastu nesūta: pārbaudi tekstu, nokopē to un nosūti no sava e-pasta. E-pasta adreses un tālruņi pirms nosūtīšanas modelim tiek aizstāti.</p>
+{{ error_summary(errors) }}
+<form method="post" class="card" novalidate>
+  {{ csrf_field() }}
+  <div class="field{% if errors.notes %} has-error{% endif %}">
+    <label for="f-notes">Iekšējās piezīmes — ko atbildēt <span class="req">(obligāts)</span></label>
+    {% if errors.notes %}<p class="error" id="f-notes-err"><span aria-hidden="true">⚠ </span>{{ errors.notes }}</p>{% endif %}
+    <textarea id="f-notes" name="notes" rows="5"{% if errors.notes %} aria-invalid="true" aria-describedby="f-notes-err"{% endif %}>{{ data.notes or '' }}</textarea>
+  </div>
+  <button type="submit" name="action" value="generate" class="btn secondary">Ģenerēt projektu ar MI</button>
+</form>
+{% if draft %}
+<section aria-labelledby="h-draft" class="card">
+  <h2 id="h-draft">Projekts</h2>
+  <p class="badge ai" role="status">Ģenerēts ar MI ({{ draft.model }}) — pārbaudi un labo pirms nosūtīšanas</p>
+  <label for="f-draft">E-pasta teksts (vari labot un kopēt)</label>
+  <textarea id="f-draft" rows="10">{{ draft.text }}</textarea>
+  <form method="post">
+    {{ csrf_field() }}
+    <input type="hidden" name="ai_model" value="{{ draft.model }}">
+    <button type="submit" name="action" value="sent" class="btn">Atzīmēt, ka nosūtīju no sava e-pasta</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

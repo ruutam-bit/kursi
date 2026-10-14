@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import status_badge with context %}
+{% block title %}{{ org.name }}{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <h1>{{ org.name }}</h1>
+  <a class="btn secondary" href="{{ url_for('org_edit', org_id=org.id) }}">Labot organizāciju</a>
+</div>
+<dl class="meta">
+  <div><dt>Reģ. nr.</dt><dd>{{ org.reg_nr }}</dd></div>
+  <div><dt>Veids</dt><dd>{{ ORG_TYPES[org.type] }}</dd></div>
+  <div><dt>Atbildīgais</dt><dd>{{ org.owner_name }}</dd></div>
+</dl>
+
+<section aria-labelledby="h-contacts" class="card" id="kontakti">
+  <div class="pagehead"><h2 id="h-contacts">Kontaktpersonas</h2>
+    <a class="btn small" href="{{ url_for('contact_new', org_id=org.id) }}">Pievienot<span class="visually-hidden"> kontaktpersonu</span></a></div>
+  <p class="hint">Kontaktpersonas ir fiziskas personas. Šīs kartītes atvēršana ir reģistrēta piekļuves žurnālā. Dzēšanu pēc personas pieprasījuma veic administrators.</p>
+  <div class="table-wrap">
+  <table>
+    <caption>{{ contacts|length }} kontaktpersonas</caption>
+    <thead><tr><th scope="col">Vārds</th><th scope="col">Amats</th><th scope="col">E-pasts</th><th scope="col">Tālrunis</th><th scope="col">Saziņas pamats</th><th scope="col">Glabāt līdz</th><th scope="col">Darbība</th></tr></thead>
+    <tbody>
+    {% for c in contacts %}
+      <tr>
+        <th scope="row">{{ c.name }}</th><td>{{ c.position or '—' }}</td>
+        <td>{% if c.email %}<a href="mailto:{{ c.email }}">{{ c.email }}</a>{% else %}—{% endif %}</td>
+        <td>{{ c.phone or '—' }}</td><td>{{ CONTACT_BASES[c.basis] }}, {{ c.basis_date }}</td>
+        <td>{{ c.retain_until }}{% if c.retain_until < g.today %} <span class="badge overdue"><span aria-hidden="true">⏰ </span>Termiņš beidzies</span>{% endif %}</td>
+        <td><a href="{{ url_for('contact_edit', contact_id=c.id) }}">Labot<span class="visually-hidden">: {{ c.name }}</span></a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7">Kontaktpersonu nav.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<div class="grid2">
+<section aria-labelledby="h-int" class="card">
+  <div class="pagehead"><h2 id="h-int">Mijiedarbību žurnāls</h2>
+    <a class="btn small" href="{{ url_for('interaction_new', org_id=org.id) }}">Jauna mijiedarbība</a></div>
+  {% if interactions %}
+  <ol class="timeline" reversed>
+    {% for i in interactions %}
+    <li>
+      <p class="muted">{{ i.date }} · {{ INTERACTION_TYPES[i.type] }} · {{ i.user_name }}{% if i.participants %} · ar: {{ i.participants }}{% endif %}
+        {% if i.ai_generated %} · <span class="badge ai">Ģenerēts ar MI, darbinieka apstiprināts</span>{% endif %}</p>
+      <p>{{ i.summary }}</p>
+      {% if i.next_step %}<p><strong>Nākamais solis:</strong> {{ i.next_step }}</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}<p>Mijiedarbību vēl nav.</p>{% endif %}
+</section>
+
+<section aria-labelledby="h-req" class="card">
+  <div class="pagehead"><h2 id="h-req">Pieprasījumi</h2>
+    <a class="btn small" href="{{ url_for('request_new', org_id=org.id) }}">Reģistrēt<span class="visually-hidden"> pieprasījumu</span></a></div>
+  {% if org_requests %}
+  <ul class="plain">
+    {% for r in org_requests %}<li>{{ r.title }} · termiņš {{ r.due_date }} · {{ status_badge(r.status, r.overdue) }}</li>{% endfor %}
+  </ul>
+  {% else %}<p>Pieprasījumu nav.</p>{% endif %}
+</section>
+</div>
+{% endblock %}

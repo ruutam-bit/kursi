@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import status_badge with context %}
+{% block title %}Organizācijas{% endblock %}
+{% block content %}
+<div class="pagehead">
+  <h1>Organizācijas</h1>
+  <a class="btn" href="{{ url_for('org_new') }}">Jauna organizācija</a>
+</div>
+<form method="get" role="search" class="searchbar">
+  <label for="q">Meklēt organizācijas, kontaktpersonas un pieprasījumus</label>
+  <input id="q" name="q" type="search" value="{{ q }}">
+  <button type="submit" class="btn">Meklēt</button>
+  {% if q %}<a href="{{ url_for('orgs') }}">Notīrīt meklēšanu</a>{% endif %}
+</form>
+{% if q %}<p role="status">Atrasti {{ orgs|length + contacts|length + found_requests|length }} rezultāti vaicājumam «{{ q }}».</p>{% endif %}
+<div class="table-wrap">
+<table>
+  <caption>Organizācijas ({{ orgs|length }}){% if q %} pēc vaicājuma «{{ q }}»{% endif %}</caption>
+  <thead><tr><th scope="col">Nosaukums</th><th scope="col">Reģ. nr.</th><th scope="col">Veids</th><th scope="col">Atbildīgais</th><th scope="col">Pēdējā saziņa</th></tr></thead>
+  <tbody>
+  {% for o in orgs %}
+    <tr><th scope="row"><a href="{{ url_for('org_detail', org_id=o.id) }}">{{ o.name }}</a></th>
+      <td>{{ o.reg_nr }}</td><td>{{ ORG_TYPES[o.type] }}</td><td>{{ o.owner_name }}</td><td>{{ o.last_contact or '—' }}</td></tr>
+  {% else %}
+    <tr><td colspan="5">Nekas nav atrasts.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% if q %}
+<table>
+  <caption>Kontaktpersonas ({{ contacts|length }})</caption>
+  <thead><tr><th scope="col">Vārds</th><th scope="col">Amats</th><th scope="col">Organizācija</th></tr></thead>
+  <tbody>{% for c in contacts %}<tr><th scope="row">{{ c.name }}</th><td>{{ c.position }}</td><td><a href="{{ url_for('org_detail', org_id=c.org_id) }}#kontakti">{{ c.org_name }}</a></td></tr>
+  {% else %}<tr><td colspan="3">Nav rezultātu.</td></tr>{% endfor %}</tbody>
+</table>
+<table>
+  <caption>Pieprasījumi ({{ found_requests|length }})</caption>
+  <thead><tr><th scope="col">Tēma</th><th scope="col">Organizācija</th><th scope="col">Termiņš</th><th scope="col">Statuss</th></tr></thead>
+  <tbody>{% for r in found_requests %}<tr><th scope="row">{{ r.title }}</th><td><a href="{{ url_for('org_detail', org_id=r.org_id) }}">{{ r.org_name }}</a></td><td>{{ r.due_date }}</td><td>{{ status_badge(r.status, r.overdue) }}</td></tr>
+  {% else %}<tr><td colspan="4">Nav rezultātu.</td></tr>{% endfor %}</tbody>
+</table>
+{% endif %}
+</div>
+{% endblock %}

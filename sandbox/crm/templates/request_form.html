@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import field, error_summary, csrf_field with context %}
+{% block title %}Jauns pieprasījums{% endblock %}
+{% block content %}
+<h1>Jauns pieprasījums: {{ org.name }}</h1>
+{{ error_summary(errors) }}
+<form method="post" class="card narrow" novalidate>
+  {{ csrf_field() }}
+  {{ field('title', 'Tēma', data, errors, required=true) }}
+  {{ field('due_date', 'Atbildes termiņš', data, errors, type='date', required=true) }}
+  <div class="actions">
+    <button type="submit" class="btn">Reģistrēt</button>
+    <a href="{{ url_for('org_detail', org_id=org.id) }}">Atcelt</a>
+  </div>
+</form>
+{% endblock %}

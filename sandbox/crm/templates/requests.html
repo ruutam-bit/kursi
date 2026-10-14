@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import status_badge, csrf_field with context %}
+{% block title %}Pieprasījumi{% endblock %}
+{% block content %}
+<h1>Pieprasījumi</h1>
+<p>Statuss mainās secībā Jauns → Darbā → Atbildēts. Kavētie ir saraksta sākumā. Jaunu pieprasījumu reģistrē organizācijas kartītē.</p>
+<div class="table-wrap">
+<table>
+  <caption>{{ rows|length }} pieprasījumi</caption>
+  <thead><tr><th scope="col">Pieprasījums</th><th scope="col">Organizācija</th><th scope="col">Termiņš</th><th scope="col">Statuss</th><th scope="col">Darbības</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr{% if r.overdue %} class="row-overdue"{% endif %}>
+      <th scope="row">{{ r.title }}</th>
+      <td><a href="{{ url_for('org_detail', org_id=r.org_id) }}">{{ r.org_name }}</a></td>
+      <td>{{ r.due_date }}</td>
+      <td>{{ status_badge(r.status, r.overdue) }}</td>
+      <td><div class="row-actions">
+        {% set nxt = {'jauns': 'darba', 'darba': 'atbildets'}.get(r.status) %}
+        {% if nxt %}
+        <form method="post" action="{{ url_for('request_advance', request_id=r.id) }}">
+          {{ csrf_field() }}<input type="hidden" name="status" value="{{ nxt }}"><input type="hidden" name="next" value="{{ request.path }}">
+          <button type="submit" class="btn small">Uz «{{ REQUEST_STATUSES[nxt] }}»<span class="visually-hidden">: {{ r.title }}</span></button>
+        </form>
+        {% endif %}
+        <a href="{{ url_for('request_reply', request_id=r.id) }}">Atbildes projekts<span class="visually-hidden">: {{ r.title }}</span></a>
+      </div></td>
+    </tr>
+  {% else %}
+    <tr><td colspan="5">Pieprasījumu nav.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
